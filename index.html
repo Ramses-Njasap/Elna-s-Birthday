@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .slide-container {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(203, 53, 107, 0.7), rgba(189, 63, 250, 0.5));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 300;
+            line-height: 1.4;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .final-message {
+            font-size: 3.5rem;
+            font-weight: 500;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 1.5rem;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .progress-dots {
+            position: absolute;
+            bottom: 100px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        
+        .dot.active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+        
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            animation: float 4s ease-in infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .message {
+                font-size: 1.8rem;
+            }
+            
+            .final-message {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .message {
+                font-size: 1.5rem;
+            }
+            
+            .final-message {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="slide-container">
+        <div class="overlay">
+            <div class="slide active" data-index="0">
+                <p class="message">I just found out it's your birthday today...</p>
+            </div>
+            <div class="slide" data-index="1">
+                <p class="message">and even though we haven't known each other long,</p>
+            </div>
+            <div class="slide" data-index="2">
+                <p class="message">I feel lucky to be sharing a piece of your special day with you.</p>
+            </div>
+            <div class="slide" data-index="3">
+                <p class="message final-message">Happy Birthday ❤️</p>
+            </div>
+            
+            <div class="progress-dots">
+                <div class="dot active" data-index="0"></div>
+                <div class="dot" data-index="1"></div>
+                <div class="dot" data-index="2"></div>
+                <div class="dot" data-index="3"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="hearts"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            const nextBtn = document.querySelector('.next-btn');
+            const prevBtn = document.querySelector('.prev-btn');
+            const hearts = document.querySelector('.hearts');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+            
+            // Create falling hearts animation
+            function createHearts() {
+                const heartsSymbols = ['❤️', '💕', '💖', '💗', '💓'];
+                
+                setInterval(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+                    heart.innerHTML = heartsSymbols[Math.floor(Math.random() * heartsSymbols.length)];
+                    hearts.appendChild(heart);
+                    
+                    // Remove heart after animation ends
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 6000);
+                }, 300);
+            }
+            
+            // Show slide by index
+            function showSlide(index) {
+                if (index < 0) index = totalSlides - 1;
+                if (index >= totalSlides) index = 0;
+                
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                dots.forEach(dot => {
+                    dot.classList.remove('active');
+                });
+                
+                slides[index].classList.add('active');
+                dots[index].classList.add('active');
+                currentSlide = index;
+                
+                // Extra celebrations for the last slide
+                if (index === totalSlides - 1) {
+                    createExtraHearts();
+                }
+            }
+            
+            function createExtraHearts() {
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.classList.add('heart');
+                        heart.style.left = Math.random() * 100 + 'vw';
+                        heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+                        heart.innerHTML = '❤️';
+                        hearts.appendChild(heart);
+                        
+                        setTimeout(() => {
+                            heart.remove();
+                        }, 6000);
+                    }, i * 100);
+                }
+            }
+            
+            // Next slide
+            function nextSlide() {
+                showSlide(currentSlide + 1);
+            }
+            
+            // Previous slide
+            function prevSlide() {
+                showSlide(currentSlide - 1);
+            }
+            
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const slideIndex = parseInt(dot.getAttribute('data-index'));
+                    showSlide(slideIndex);
+                });
+            });
+            
+            // Auto-advance slides every 5 seconds
+            let slideInterval = setInterval(nextSlide, 5000);
+            
+            // Pause auto-advance when interacting with controls
+            const controls = document.querySelector('.controls');
+            controls.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            controls.addEventListener('mouseleave', () => {
+                slideInterval = setInterval(nextSlide, 5000);
+            });
+            
+            // Key navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+            
+            // Start hearts animation
+            createHearts();
+            
+            // Set background image
+            const backgroundImages = [
+                'image.png'
+            ];
+            
+            const slideContainer = document.querySelector('.slide-container');
+            slideContainer.style.backgroundImage = `url(${backgroundImages[0]})`;
+        });
+    </script>
+</body>
+</html>
