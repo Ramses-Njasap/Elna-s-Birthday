@@ -292,8 +292,8 @@
                 });
             });
             
-            // Auto-advance slides every 5 seconds
-            let slideInterval = setInterval(nextSlide, 5000);
+            // Auto-advance slides every 7 seconds
+            let slideInterval = setInterval(nextSlide, 7000);
             
             // Pause auto-advance when interacting with controls
             const controls = document.querySelector('.controls');
@@ -302,7 +302,7 @@
             });
             
             controls.addEventListener('mouseleave', () => {
-                slideInterval = setInterval(nextSlide, 5000);
+                slideInterval = setInterval(nextSlide, 7000);
             });
             
             // Key navigation
